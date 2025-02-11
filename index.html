@@ -3,134 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>간단한 모험 게임</title>
+  <title>픽셀 아트 게임</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 50px;
-      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #87CEEB; /* 하늘색 배경 */
     }
-    #gameText {
-      font-size: 1.5em;
-      margin-bottom: 20px;
-    }
-    .button {
-      padding: 10px 20px;
-      font-size: 1em;
-      margin: 10px;
-      cursor: pointer;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-    .button:hover {
-      background-color: #45a049;
+    canvas {
+      display: block;
+      background-color: #87CEEB; /* 하늘색 배경 */
+      margin: 0 auto;
+      border: 2px solid #000;
     }
   </style>
 </head>
 <body>
-
-  <h1>간단한 모험 게임</h1>
-  <p id="gameText">어두운 숲에 들어왔습니다. 두 개의 길이 보입니다. 왼쪽으로 가시겠습니까, 오른쪽으로 가시겠습니까?</p>
-  
-  <button class="button" onclick="leftPath()">왼쪽 길</button>
-  <button class="button" onclick="rightPath()">오른쪽 길</button>
+  <canvas id="gameCanvas"></canvas>
 
   <script>
-    function leftPath() {
-      const gameText = document.getElementById("gameText");
-      gameText.textContent = "왼쪽 길로 가자마자 커다란 동굴이 나타났습니다. 동굴로 들어가겠습니까, 아니면 돌아가겠습니까?";
-      
-      // 버튼을 업데이트
-      document.querySelectorAll("button").forEach((btn, index) => {
-        if (index === 0) {
-          btn.textContent = "동굴로 들어간다";
-          btn.onclick = enterCave;
-        } else {
-          btn.textContent = "돌아간다";
-          btn.onclick = goBack;
-        }
-      });
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // 게임 설정
+    const canvasWidth = 800;
+    const canvasHeight = 600;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    // 캐릭터 설정
+    const player = {
+      x: 100,
+      y: 100,
+      width: 32,
+      height: 32,
+      speed: 5, // 화살표 키로 이동 속도
+      color: "red"
+    };
+
+    // 게임 루프 설정
+    let lastTime = 0;
+
+    // 키 입력 상태 추적
+    const keys = {
+      up: false,
+      down: false,
+      left: false,
+      right: false
+    };
+
+    // 키 이벤트 처리
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowUp") keys.up = true;
+      if (e.key === "ArrowDown") keys.down = true;
+      if (e.key === "ArrowLeft") keys.left = true;
+      if (e.key === "ArrowRight") keys.right = true;
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowUp") keys.up = false;
+      if (e.key === "ArrowDown") keys.down = false;
+      if (e.key === "ArrowLeft") keys.left = false;
+      if (e.key === "ArrowRight") keys.right = false;
+    });
+
+    // 캐릭터 이동
+    function movePlayer() {
+      if (keys.up) player.y -= player.speed;
+      if (keys.down) player.y += player.speed;
+      if (keys.left) player.x -= player.speed;
+      if (keys.right) player.x += player.speed;
+
+      // 화면 밖으로 나가지 않도록 제한
+      player.x = Math.max(0, Math.min(canvasWidth - player.width, player.x));
+      player.y = Math.max(0, Math.min(canvasHeight - player.height, player.y));
     }
 
-    function rightPath() {
-      const gameText = document.getElementById("gameText");
-      gameText.textContent = "오른쪽 길로 가자마자 용이 나타났습니다. 싸울까요, 아니면 도망갈까요?";
-      
-      // 버튼을 업데이트
-      document.querySelectorAll("button").forEach((btn, index) => {
-        if (index === 0) {
-          btn.textContent = "싸운다";
-          btn.onclick = fightDragon;
-        } else {
-          btn.textContent = "도망간다";
-          btn.onclick = runAway;
-        }
-      });
+    // 게임 그리기 함수
+    function draw() {
+      // 화면 지우기
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      // 배경 (픽셀 스타일)
+      ctx.fillStyle = "#87CEEB";
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      // 캐릭터 그리기 (픽셀 스타일)
+      ctx.fillStyle = player.color;
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+
+      // 게임 루프 계속 돌리기
+      requestAnimationFrame(gameLoop);
     }
 
-    function enterCave() {
-      const gameText = document.getElementById("gameText");
-      gameText.textContent = "동굴 속에 들어갔더니, 보물 상자가 있습니다! 보물을 열어 보겠습니까?";
-      
-      document.querySelectorAll("button").forEach((btn, index) => {
-        if (index === 0) {
-          btn.textContent = "보물을 연다";
-          btn.onclick = openTreasure;
-        } else {
-          btn.textContent = "동굴을 나간다";
-          btn.onclick = goBack;
-        }
-      });
+    // 게임 루프
+    function gameLoop(timestamp) {
+      movePlayer();
+      draw();
     }
 
-    function goBack() {
-      const gameText = document.getElementById("gameText");
-      gameText.textContent = "숲 속으로 돌아가서 다시 시작합니다. 왼쪽 길과 오른쪽 길 중 어떤 길을 선택하시겠습니까?";
-      
-      // 버튼을 초기화
-      document.querySelectorAll("button").forEach((btn, index) => {
-        if (index === 0) {
-          btn.textContent = "왼쪽 길";
-          btn.onclick = leftPath;
-        } else {
-          btn.textContent = "오른쪽 길";
-          btn.onclick = rightPath;
-        }
-      });
-    }
-
-    function fightDragon() {
-      const gameText = document.getElementById("gameText");
-      gameText.textContent = "용과 싸우다가 결국 패배했습니다... 게임이 끝났습니다.";
-      
-      // 버튼을 초기화
-      document.querySelectorAll("button").forEach((btn) => {
-        btn.style.display = "none"; // 버튼 숨기기
-      });
-    }
-
-    function runAway() {
-      const gameText = document.getElementById("gameText");
-      gameText.textContent = "용에게서 도망쳤습니다. 숲 속으로 돌아갑니다.";
-      
-      // 버튼을 초기화
-      setTimeout(goBack, 2000); // 2초 후 돌아가기
-    }
-
-    function openTreasure() {
-      const gameText = document.getElementById("gameText");
-      gameText.textContent = "보물 상자 안에 금화가 가득합니다! 당신은 부자가 되었습니다. 게임이 끝났습니다.";
-      
-      // 버튼을 초기화
-      document.querySelectorAll("button").forEach((btn) => {
-        btn.style.display = "none"; // 버튼 숨기기
-      });
-    }
+    // 게임 시작
+    gameLoop();
   </script>
-
 </body>
 </html>
-
