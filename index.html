@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>픽셀 아트 게임</title>
+  <title>픽셀 아트 모험 게임</title>
   <style>
     body {
       margin: 0;
@@ -13,8 +13,8 @@
     }
     canvas {
       display: block;
-      background-color: #87CEEB; /* 하늘색 배경 */
       margin: 0 auto;
+      background-color: #87CEEB; /* 하늘색 배경 */
       border: 2px solid #000;
     }
   </style>
@@ -35,11 +35,27 @@
     // 캐릭터 설정
     const player = {
       x: 100,
-      y: 100,
-      width: 32,
-      height: 32,
-      speed: 5, // 화살표 키로 이동 속도
-      color: "red"
+      y: 400,
+      width: 180,
+      height: 180,
+      speed: 5,
+      color: "#FF6347",  // 캐릭터 색상 (Tomato)
+    };
+
+    // 마을과 몬스터
+    const village = {
+      x: 600,
+      y: 300,
+      width: 150,
+      height: 150,
+    };
+
+    const monster = {
+      x: 400,
+      y: 400,
+      width: 180,
+      height: 180,
+      color: "#8B0000", // 몬스터 색상 (DarkRed)
     };
 
     // 게임 루프 설정
@@ -80,18 +96,43 @@
       player.y = Math.max(0, Math.min(canvasHeight - player.height, player.y));
     }
 
+    // 배경 그리기
+    function drawBackground() {
+      // 하늘 (배경)
+      ctx.fillStyle = "#87CEEB";
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight / 2);  // 하늘
+
+      // 땅
+      ctx.fillStyle = "#228B22"; // 숲 색상
+      ctx.fillRect(0, canvasHeight / 2, canvasWidth, canvasHeight / 2);  // 땅
+    }
+
+    // 마을 그리기
+    function drawVillage() {
+      ctx.fillStyle = "#8B4513"; // 마을 집 색상
+      ctx.fillRect(village.x, village.y, village.width, village.height); // 마을
+    }
+
+    // 몬스터 그리기
+    function drawMonster() {
+      ctx.fillStyle = monster.color;
+      ctx.fillRect(monster.x, monster.y, monster.width, monster.height); // 몬스터
+    }
+
+    // 캐릭터 그리기
+    function drawPlayer() {
+      ctx.fillStyle = player.color;
+      ctx.fillRect(player.x, player.y, player.width, player.height); // 캐릭터
+    }
+
     // 게임 그리기 함수
     function draw() {
-      // 화면 지우기
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);  // 화면 지우기
 
-      // 배경 (픽셀 스타일)
-      ctx.fillStyle = "#87CEEB";
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
-      // 캐릭터 그리기 (픽셀 스타일)
-      ctx.fillStyle = player.color;
-      ctx.fillRect(player.x, player.y, player.width, player.height);
+      drawBackground();   // 하늘과 땅 그리기
+      drawVillage();      // 마을 그리기
+      drawMonster();      // 몬스터 그리기
+      drawPlayer();       // 캐릭터 그리기
 
       // 게임 루프 계속 돌리기
       requestAnimationFrame(gameLoop);
@@ -99,12 +140,14 @@
 
     // 게임 루프
     function gameLoop(timestamp) {
-      movePlayer();
-      draw();
+      movePlayer();  // 플레이어 이동
+      draw();        // 화면 갱신
     }
 
     // 게임 시작
     gameLoop();
   </script>
+
 </body>
 </html>
+
