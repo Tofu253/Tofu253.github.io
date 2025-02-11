@@ -1,336 +1,46 @@
-<!DOCTYPE html>
-<html lang="ko">
+<<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>픽셀 아트 모험 게임</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background-color: #87CEEB; /* 하늘색 배경 */
-    }
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background-color: #87CEEB; /* 하늘색 배경 */
-      border: 2px solid #000;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Game Example</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
 </head>
 <body>
-  <canvas id="gameCanvas"></canvas>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // 씬, 카메라, 렌더러 설정
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-  <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+        // 큐브 만들기
+        var geometry = new THREE.BoxGeometry(1, 1, 1);
+        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        var cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
 
-    // 게임 설정
-    const canvasWidth = 800;
-    const canvasHeight = 600;
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+        // 카메라 위치 조정
+        camera.position.z = 5;
 
-    // 이미지 불러오기
-    const playerImage = new Image();
-    const monsterImage = new Image();
-    const villageImage = new Image();
+        // 애니메이션 함수
+        var animate = function () {
+            requestAnimationFrame(animate);
 
-    playerImage.src = 'player.png'; // 플레이어 캐릭터 이미지 (픽셀 아트)
-    monsterImage.src = 'monster.png'; // 몬스터 이미지 (픽셀 아트)
-    villageImage.src = 'village.png'; // 마을 이미지 (픽셀 아트)
+            // 큐브 회전
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
 
-    // 플레이어 설정
-    const player = {
-      x: 100,
-      y: 400,
-      width: 180,
-      height: 180,
-      speed: 5,
-    };
+            // 렌더링
+            renderer.render(scene, camera);
+        };
 
-    // 마을과 몬스터
-    const village = {
-      x: 600,
-      y: 300,
-      width: 150,
-      height: 150,
-    };
-
-    const monster = {
-      x: 400,
-      y: 400,
-      width: 180,
-      height: 180,
-    };
-
-    // 게임 루프 설정
-    let lastTime = 0;
-
-    // 키 입력 상태 추적
-    const keys = {
-      up: false,
-      down: false,
-      left: false,
-      right: false
-    };
-
-    // 키 이벤트 처리
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowUp") keys.up = true;
-      if (e.key === "ArrowDown") keys.down = true;
-      if (e.key === "ArrowLeft") keys.left = true;
-      if (e.key === "ArrowRight") keys.right = true;
-    });
-
-    window.addEventListener("keyup", (e) => {
-      if (e.key === "ArrowUp") keys.up = false;
-      if (e.key === "ArrowDown") keys.down = false;
-      if (e.key === "ArrowLeft") keys.left = false;
-      if (e.key === "ArrowRight") keys.right = false;
-    });
-
-    // 캐릭터 이동
-    function movePlayer() {
-      if (keys.up) player.y -= player.speed;
-      if (keys.down) player.y += player.speed;
-      if (keys.left) player.x -= player.speed;
-      if (keys.right) player.x += player.speed;
-
-      // 화면 밖으로 나가지 않도록 제한
-      player.x = Math.max(0, Math.min(canvasWidth - player.width, player.x));
-      player.y = Math.max(0, Math.min(canvasHeight - player.height, player.y));
-    }
-
-    // 배경 그리기
-    function drawBackground() {
-      // 하늘 (배경)
-      ctx.fillStyle = "#87CEEB";
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight / 2);  // 하늘
-
-      // 땅
-      ctx.fillStyle = "#228B22"; // 숲 색상
-      ctx.fillRect(0, canvasHeight / 2, canvasWidth, canvasHeight / 2);  // 땅
-    }
-
-    // 마을 그리기
-    function drawVillage() {
-      ctx.drawImage(villageImage, village.x, village.y, village.width, village.height); // 마을
-    }
-
-    // 몬스터 그리기
-    function drawMonster() {
-      ctx.drawImage(monsterImage, monster.x, monster.y, monster.width, monster.height); // 몬스터
-    }
-
-    // 캐릭터 그리기
-    function drawPlayer() {
-      ctx.drawImage(playerImage, player.x, player.y, player.width, player.height); // 플레이어 캐릭터
-    }
-
-    // 게임 그리기 함수
-    function draw() {
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);  // 화면 지우기
-
-      drawBackground();   // 하늘과 땅 그리기
-      drawVillage();      // 마을 그리기
-      drawMonster();      // 몬스터 그리기
-      drawPlayer();       // 플레이어 캐릭터 그리기
-
-      // 게임 루프 계속 돌리기
-      requestAnimationFrame(gameLoop);
-    }
-
-    // 게임 루프
-    function gameLoop(timestamp) {
-      movePlayer();  // 플레이어 이동
-      draw();        // 화면 갱신
-    }
-
-    // 게임 시작
-    gameLoop();
-  </script>
-
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>픽셀 아트 모험 게임</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background-color: #87CEEB; /* 하늘색 배경 */
-    }
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background-color: #87CEEB; /* 하늘색 배경 */
-      border: 2px solid #000;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="gameCanvas"></canvas>
-
-  <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-
-    // 게임 설정
-    const canvasWidth = 800;
-    const canvasHeight = 600;
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-
-    // 스프라이트 시트 이미지 불러오기
-    const playerSpriteSheet = new Image();
-    playerSpriteSheet.src = 'player_spritesheet.png'; // 플레이어 스프라이트 시트 (이미지 파일)
-
-    // 플레이어 설정
-    const player = {
-      x: 100,
-      y: 400,
-      width: 32,  // 픽셀 크기 (한 프레임 크기)
-      height: 32, // 픽셀 크기
-      speed: 5,
-      direction: 'down', // 초기 방향
-      frameX: 0, // 스프라이트 시트에서 현재 프레임
-      frameY: 0, // Y축은 방향 (예: down, up, left, right)
-      frameCount: 4, // 각 방향에 대한 프레임 개수
-      isMoving: false, // 이동 상태
-    };
-
-    // 게임 루프 설정
-    let lastTime = 0;
-
-    // 키 입력 상태 추적
-    const keys = {
-      up: false,
-      down: false,
-      left: false,
-      right: false
-    };
-
-    // 키 이벤트 처리
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowUp") keys.up = true;
-      if (e.key === "ArrowDown") keys.down = true;
-      if (e.key === "ArrowLeft") keys.left = true;
-      if (e.key === "ArrowRight") keys.right = true;
-    });
-
-    window.addEventListener("keyup", (e) => {
-      if (e.key === "ArrowUp") keys.up = false;
-      if (e.key === "ArrowDown") keys.down = false;
-      if (e.key === "ArrowLeft") keys.left = false;
-      if (e.key === "ArrowRight") keys.right = false;
-    });
-
-    // 캐릭터 이동
-    function movePlayer() {
-      if (keys.up) {
-        player.y -= player.speed;
-        player.direction = 'up';
-        player.isMoving = true;
-      }
-      if (keys.down) {
-        player.y += player.speed;
-        player.direction = 'down';
-        player.isMoving = true;
-      }
-      if (keys.left) {
-        player.x -= player.speed;
-        player.direction = 'left';
-        player.isMoving = true;
-      }
-      if (keys.right) {
-        player.x += player.speed;
-        player.direction = 'right';
-        player.isMoving = true;
-      }
-
-      // 화면 밖으로 나가지 않도록 제한
-      player.x = Math.max(0, Math.min(canvasWidth - player.width, player.x));
-      player.y = Math.max(0, Math.min(canvasHeight - player.height, player.y));
-    }
-
-    // 프레임 갱신 (애니메이션)
-    function updatePlayerAnimation() {
-      if (player.isMoving) {
-        player.frameX++;
-        if (player.frameX >= player.frameCount) {
-          player.frameX = 0;
-        }
-      } else {
-        player.frameX = 0;
-      }
-      player.isMoving = false;
-    }
-
-    // 배경 그리기
-    function drawBackground() {
-      ctx.fillStyle = "#87CEEB";
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight / 2);  // 하늘
-
-      ctx.fillStyle = "#228B22"; // 숲 색상
-      ctx.fillRect(0, canvasHeight / 2, canvasWidth, canvasHeight / 2);  // 땅
-    }
-
-    // 캐릭터 그리기
-    function drawPlayer() {
-      const frameWidth = 32; // 한 프레임의 너비
-      const frameHeight = 32; // 한 프레임의 높이
-
-      // 스프라이트 시트에서 프레임을 잘라서 그리기
-      const directions = {
-        up: 0,
-        down: 1,
-        left: 2,
-        right: 3
-      };
-
-      ctx.drawImage(
-        playerSpriteSheet, 
-        player.frameX * frameWidth,  // X 좌표 (현재 프레임)
-        directions[player.direction] * frameHeight,  // Y 좌표 (방향에 따라)
-        frameWidth, frameHeight,  // 프레임 크기
-        player.x, player.y,  // 화면에 표시할 위치
-        frameWidth, frameHeight  // 캐릭터 크기
-      );
-    }
-
-    // 게임 그리기 함수
-    function draw() {
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);  // 화면 지우기
-
-      drawBackground();   // 하늘과 땅 그리기
-      drawPlayer();       // 플레이어 캐릭터 그리기
-
-      // 게임 루프 계속 돌리기
-      requestAnimationFrame(gameLoop);
-    }
-
-    // 게임 루프
-    function gameLoop(timestamp) {
-      movePlayer();  // 플레이어 이동
-      updatePlayerAnimation(); // 플레이어 애니메이션 업데이트
-      draw();        // 화면 갱신
-    }
-
-    // 게임 시작
-    gameLoop();
-  </script>
-
-</body>
-</html>
-
-
+        animate();
+    </script>
 </body>
 </html>
