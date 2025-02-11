@@ -1,9 +1,9 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Game Example</title>
+    <title>3D Shooting Game</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
@@ -19,22 +19,71 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // 큐브 만들기
-        var geometry = new THREE.BoxGeometry(1, 1, 1);
-        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        var cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
+        // 총알 생성 함수
+        function createBullet() {
+            var geometry = new THREE.SphereGeometry(0.1, 32, 32);
+            var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            var bullet = new THREE.Mesh(geometry, material);
+            bullet.position.set(camera.position.x, camera.position.y, camera.position.z);
+            scene.add(bullet);
+            bullets.push(bullet);
+            return bullet;
+        }
 
-        // 카메라 위치 조정
+        // 목표물 생성
+        function createTarget() {
+            var geometry = new THREE.BoxGeometry(1, 1, 1);
+            var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            var target = new THREE.Mesh(geometry, material);
+            target.position.set(Math.random() * 10 - 5, Math.random() * 5 + 1, Math.random() * 10 - 5);
+            scene.add(target);
+            targets.push(target);
+            return target;
+        }
+
+        // 총알과 목표물 배열
+        var bullets = [];
+        var targets = [];
+
+        // 여러 개의 목표물 생성
+        for (var i = 0; i < 5; i++) {
+            createTarget();
+        }
+
+        // 카메라 위치 설정
         camera.position.z = 5;
+
+        // 키보드 이벤트 처리 (공격)
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                createBullet(); // 스페이스 바를 누르면 총알 발사
+            }
+        });
 
         // 애니메이션 함수
         var animate = function () {
             requestAnimationFrame(animate);
 
-            // 큐브 회전
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
+            // 총알 이동
+            bullets.forEach(function(bullet, index) {
+                bullet.position.z -= 0.1; // 총알이 전진하도록 이동
+                if (bullet.position.z < -10) {
+                    scene.remove(bullet); // 화면 밖으로 나간 총알 제거
+                    bullets.splice(index, 1);
+                }
+            });
+
+            // 충돌 검사
+            bullets.forEach(function(bullet) {
+                targets.forEach(function(target, targetIndex) {
+                    if (bullet.position.distanceTo(target.position) < 1) { // 충돌 감지
+                        scene.remove(target); // 목표물 제거
+                        scene.remove(bullet); // 총알 제거
+                        bullets.splice(bullets.indexOf(bullet), 1); // 배열에서 총알 제거
+                        targets.splice(targetIndex, 1); // 배열에서 목표물 제거
+                    }
+                });
+            });
 
             // 렌더링
             renderer.render(scene, camera);
