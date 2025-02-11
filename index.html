@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>간단한 모험 게임</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      background-color: #f4f4f4;
+    }
+    #gameText {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+    .button {
+      padding: 10px 20px;
+      font-size: 1em;
+      margin: 10px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    .button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>간단한 모험 게임</h1>
+  <p id="gameText">어두운 숲에 들어왔습니다. 두 개의 길이 보입니다. 왼쪽으로 가시겠습니까, 오른쪽으로 가시겠습니까?</p>
+  
+  <button class="button" onclick="leftPath()">왼쪽 길</button>
+  <button class="button" onclick="rightPath()">오른쪽 길</button>
+
+  <script>
+    function leftPath() {
+      const gameText = document.getElementById("gameText");
+      gameText.textContent = "왼쪽 길로 가자마자 커다란 동굴이 나타났습니다. 동굴로 들어가겠습니까, 아니면 돌아가겠습니까?";
+      
+      // 버튼을 업데이트
+      document.querySelectorAll("button").forEach((btn, index) => {
+        if (index === 0) {
+          btn.textContent = "동굴로 들어간다";
+          btn.onclick = enterCave;
+        } else {
+          btn.textContent = "돌아간다";
+          btn.onclick = goBack;
+        }
+      });
+    }
+
+    function rightPath() {
+      const gameText = document.getElementById("gameText");
+      gameText.textContent = "오른쪽 길로 가자마자 용이 나타났습니다. 싸울까요, 아니면 도망갈까요?";
+      
+      // 버튼을 업데이트
+      document.querySelectorAll("button").forEach((btn, index) => {
+        if (index === 0) {
+          btn.textContent = "싸운다";
+          btn.onclick = fightDragon;
+        } else {
+          btn.textContent = "도망간다";
+          btn.onclick = runAway;
+        }
+      });
+    }
+
+    function enterCave() {
+      const gameText = document.getElementById("gameText");
+      gameText.textContent = "동굴 속에 들어갔더니, 보물 상자가 있습니다! 보물을 열어 보겠습니까?";
+      
+      document.querySelectorAll("button").forEach((btn, index) => {
+        if (index === 0) {
+          btn.textContent = "보물을 연다";
+          btn.onclick = openTreasure;
+        } else {
+          btn.textContent = "동굴을 나간다";
+          btn.onclick = goBack;
+        }
+      });
+    }
+
+    function goBack() {
+      const gameText = document.getElementById("gameText");
+      gameText.textContent = "숲 속으로 돌아가서 다시 시작합니다. 왼쪽 길과 오른쪽 길 중 어떤 길을 선택하시겠습니까?";
+      
+      // 버튼을 초기화
+      document.querySelectorAll("button").forEach((btn, index) => {
+        if (index === 0) {
+          btn.textContent = "왼쪽 길";
+          btn.onclick = leftPath;
+        } else {
+          btn.textContent = "오른쪽 길";
+          btn.onclick = rightPath;
+        }
+      });
+    }
+
+    function fightDragon() {
+      const gameText = document.getElementById("gameText");
+      gameText.textContent = "용과 싸우다가 결국 패배했습니다... 게임이 끝났습니다.";
+      
+      // 버튼을 초기화
+      document.querySelectorAll("button").forEach((btn) => {
+        btn.style.display = "none"; // 버튼 숨기기
+      });
+    }
+
+    function runAway() {
+      const gameText = document.getElementById("gameText");
+      gameText.textContent = "용에게서 도망쳤습니다. 숲 속으로 돌아갑니다.";
+      
+      // 버튼을 초기화
+      setTimeout(goBack, 2000); // 2초 후 돌아가기
+    }
+
+    function openTreasure() {
+      const gameText = document.getElementById("gameText");
+      gameText.textContent = "보물 상자 안에 금화가 가득합니다! 당신은 부자가 되었습니다. 게임이 끝났습니다.";
+      
+      // 버튼을 초기화
+      document.querySelectorAll("button").forEach((btn) => {
+        btn.style.display = "none"; // 버튼 숨기기
+      });
+    }
+  </script>
+
+</body>
+</html>
+
